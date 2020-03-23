@@ -22,7 +22,9 @@ class base_sri_model:
 
         self.sol = scipy.integrate.solve_ivp(lambda t,y : self.edp_model(t,y), [0,t_max], self.y0,rtol=rtol)
 
-    def _show_simu_results(self):
+    def _show_simu_results(self,labels_to_show=["all"]):
+        if labels_to_show == ["all"] : labels_to_show = self.labels
+
         if self.sol == None:
             logger.error("no simulation to draw compute first")
 
@@ -31,7 +33,8 @@ class base_sri_model:
         ax.set_ylabel('population proportion []')
 
         for i in range(len(self.sol.y)):
-            ax.plot(self.sol.t,self.sol.y[i],label=self.labels[i])
+            if self.labels[i] in labels_to_show:
+                ax.plot(self.sol.t,self.sol.y[i],label=self.labels[i])
 
         plt.legend()
         plt.show()
