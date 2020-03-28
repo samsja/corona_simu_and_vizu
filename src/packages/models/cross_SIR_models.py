@@ -1,10 +1,11 @@
 import numpy as np
-from SIR_models import base_sri_model
+from .SIR_models import base_sri_model
 
 import itertools
+import matplotlib.pyplot as plt
 
 
-class cross_SIR(SIR_models.base_sri_model):
+class cross_SIR(base_sri_model):
     '''
     this class in a subclass of base_sri_model.
 
@@ -42,6 +43,7 @@ class cross_SIR(SIR_models.base_sri_model):
             raise ValueError(f" the y0 per countrie vector {self.y0_infected} does not match the number of labels {len(self.labels)}  ")
 
         self.true_labels = [label for label in self.labels] #original labels value
+        self.delimiter=delimiter
         self.labels= [ f"{country}{delimiter}{label}" for label,country in itertools.product(self.labels,self.countries)]
 
 
@@ -71,3 +73,44 @@ class cross_SIR(SIR_models.base_sri_model):
         dydt = np.append(S,I)
         dydt = np.append(dydt,R)
         return dydt
+
+
+
+    def _show_simu_results(self,countries_to_show=["all"],labels_to_show=["all"],figsize=(14,5)):
+
+        '''
+        show the results of computation according to the selected label:
+
+        *labels_to_show is the list of labels that need to be draw
+        *countries is the list of the country we want to show
+
+        '''
+
+        if labels_to_show == ["all"] : labels_to_show = self.true_labels
+        if countries_to_show==["all"] : countries_to_show = self.countries
+
+        if self.sol == None:
+            raise ValueError("no simulation to draw compute first")
+
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.set_xlabel('time [day]')
+        ax.set_ylabel('population proportion []')
+
+
+        labels_to_show = [ f"{country}{self.delimiter}{label}" for label,country in itertools.product(labels_to_show,countries_to_show)]
+
+        for i in range(len(self.sol.y)):
+            if self.labels[i] in labels_to_show:
+                ax.plot(self.sol.t,self.sol.y[i],label=self.labels[i])
+
+        plt.legend()
+        plt.show()
+
+    def get_results(self,countries_to_get=["all"],labels_to_get=["all"]):
+        if labels_to_get == ["all"] : labels_to_get = self.true_labels
+        if countries_to_get==["all"] : countries_to_get = self.countries
+
+        labels_to_get= [ f"{country}{self.delimiter}{label}" for label,country in itertools.product(labels_to_get,countries_to_get)]
+
+        indexes = [ self.labels.index(label_to_get) for label_to_get in labels_to_get]
+        return self.sol.y[ indexes]

@@ -45,7 +45,7 @@ class base_sri_model:
 
         self.sol = scipy.integrate.solve_ivp(lambda t,y : self.edp_model(t,y), [0,t_max], self.y0,rtol=rtol)
 
-    def _show_simu_results(self,labels_to_show=["all"]):
+    def _show_simu_results(self,labels_to_show=["all"],figsize=(14,5)):
 
         '''
         show the results of computation according to the selected label:
@@ -59,7 +59,7 @@ class base_sri_model:
         if self.sol == None:
             logger.error("no simulation to draw compute first")
 
-        fig, ax = plt.subplots(figsize=(14, 5))
+        fig, ax = plt.subplots(figsize=figsize)
         ax.set_xlabel('time [day]')
         ax.set_ylabel('population proportion []')
 
@@ -69,6 +69,7 @@ class base_sri_model:
 
         plt.legend()
         plt.show()
+
 
     def simulate(self):
         '''
