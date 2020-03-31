@@ -47,7 +47,6 @@ class cross_SIR(base_sri_model):
         self.labels= [ f"{country}{delimiter}{label}" for label,country in itertools.product(self.labels,self.countries)]
 
 
-
         self.y0 = np.repeat(1,len(self.true_labels))
 
         self.y0 = np.array([])
@@ -140,6 +139,8 @@ class cross_SIRCD(cross_SIR):
     index_countries_infected = np.array([countries.index("it")])
     t_max = 50
 
+    def __init__(self):
+        super().__init__()
 
     def edp_model(self,t,y):
 
