@@ -114,3 +114,58 @@ class cross_SIR(base_sri_model):
 
         indexes = [ self.labels.index(label_to_get) for label_to_get in labels_to_get]
         return self.sol.y[ indexes]
+
+
+
+class cross_SIRCD(cross_SIR):
+    labels=["healthy","infected","recovered","incubating","dead"]
+    countries = ["fr","it"] #countries or cities
+    # cross labels will be generate at class creation
+    a = 10
+    beta=1
+
+    v = 3
+    mu = 0.2
+
+    U = beta*np.eye(len(countries))
+    flux_cross_both_contries=0.001
+
+    U[0,1]=flux_cross_both_contries
+    U[1,0]=flux_cross_both_contries
+
+    epsilon = 1e-2
+    y0_infected = np.array([1-epsilon,epsilon,0,0,0])
+
+    y0_not_infected = np.array([1,0,0,0,0])
+    index_countries_infected = np.array([countries.index("it")])
+    t_max = 50
+
+
+    def edp_model(self,t,y):
+
+        S = np.array(y[0:len(self.countries)], copy=False)
+        I = np.array(y[len(self.countries):2*len(self.countries)], copy=False)
+        R = np.array(y[2*len(self.countries):3*len(self.countries)], copy=False)
+        C = np.array(y[3*len(self.countries):4*len(self.countries)], copy=False)
+        D = np.array(y[4*len(self.countries):5*len(self.countries)], copy=False)
+
+
+        in_incubation = S*(self.U@(I+C))
+        sick =  C/self.v
+        dead = I*self.mu
+        recovered = I/self.a
+
+
+        S = -in_incubation
+        C = in_incubation -sick
+        I = sick - dead - recovered
+        R = recovered
+        D = dead
+
+        dydt = np.append(S,I)
+        dydt = np.append(dydt,R)
+        dydt = np.append(dydt,C)
+        dydt = np.append(dydt,D)
+
+
+        return dydt
