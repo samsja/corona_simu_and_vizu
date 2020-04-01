@@ -106,6 +106,9 @@ class cross_SIR(base_sri_model):
         plt.show()
 
     def get_results(self,countries_to_get=["all"],labels_to_get=["all"]):
+        if self.sol == None:
+            raise ValueError("no simulation to draw compute first")
+
         if labels_to_get == ["all"] : labels_to_get = self.true_labels
         if countries_to_get==["all"] : countries_to_get = self.countries
 
@@ -114,6 +117,12 @@ class cross_SIR(base_sri_model):
         indexes = [ self.labels.index(label_to_get) for label_to_get in labels_to_get]
         return self.sol.y[ indexes]
 
+    def __getitem__(self,key):
+        '''
+        key must be a tuple ("country","lables")
+        '''
+        (country,label) = key
+        return self.get_results(countries_to_get=[country],labels_to_get=[label])
 
 
 class cross_SIRCD(cross_SIR):
