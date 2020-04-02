@@ -4,7 +4,7 @@ from .SIR_models import base_sri_model
 import itertools
 import matplotlib.pyplot as plt
 import scipy.integrate as integrate
-
+import pandas as pd
 
 class cross_SIR(base_sri_model):
     '''
@@ -113,10 +113,21 @@ class cross_SIR(base_sri_model):
         if labels_to_get == ["all"] : labels_to_get = self.true_labels
         if countries_to_get==["all"] : countries_to_get = self.countries
 
+
+
+        for country in countries_to_get:
+            if not(country in self.countries):
+                raise ValueError(f" {country} not in countries attribute ")
+
+        for label in labels_to_get:
+            if not(label in self.true_labels):
+                raise ValueError(f" {label} not in labels attribute ")
+
+
         labels_to_get= [ f"{country}{self.delimiter}{label}" for label,country in itertools.product(labels_to_get,countries_to_get)]
 
         indexes = [ self.labels.index(label_to_get) for label_to_get in labels_to_get]
-        return self.sol.y[ indexes]
+        return self.sol.y[indexes].reshape((self.sol.y[indexes].shape[1]))
 
     def __getitem__(self,key):
         '''
@@ -125,6 +136,18 @@ class cross_SIR(base_sri_model):
         (country,label) = key
         return self.get_results(countries_to_get=[country],labels_to_get=[label])
 
+    def _generate_df(self):
+
+        df_s = []
+
+        for country,label in itertools.product(self.countries,self.true_labels):
+            df = pd.DataFrame({"country":country, "label":label ,"time":self.sol.t , "value":self[country,label]})
+            df_s.append(df)
+
+
+        self.df = df
+
+        return pd.concat(df_s)
 
 class cross_SIRCD(cross_SIR):
     labels=["healthy","infected","recovered","incubating","dead"]
