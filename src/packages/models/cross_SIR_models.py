@@ -3,6 +3,7 @@ from .SIR_models import base_sri_model
 
 import itertools
 import matplotlib.pyplot as plt
+import scipy.integrate as integrate
 
 
 class cross_SIR(base_sri_model):
