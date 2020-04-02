@@ -136,18 +136,21 @@ class cross_SIR(base_sri_model):
         (country,label) = key
         return self.get_results(countries_to_get=[country],labels_to_get=[label])
 
-    def _generate_df(self):
+    def _generate_df(self,countries_to_get=["all"],labels_to_get=["all"]):
+
+        if labels_to_get == ["all"] : labels_to_get = self.true_labels
+        if countries_to_get==["all"] : countries_to_get = self.countries
 
         df_s = []
 
         for country,label in itertools.product(self.countries,self.true_labels):
-            df = pd.DataFrame({"country":country, "label":label ,"time":self.sol.t , "value":self[country,label]})
-            df_s.append(df)
+            if label in labels_to_get and country in countries_to_get:
+                df = pd.DataFrame({"country":country, "label":label ,"time":self.sol.t , "value":self[country,label]})
+                df_s.append(df)
 
+        self.df = pd.concat(df_s)
 
-        self.df = df
-
-        return pd.concat(df_s)
+        return self.df
 
 class cross_SIRCD(cross_SIR):
     labels=["healthy","infected","recovered","incubating","dead"]
